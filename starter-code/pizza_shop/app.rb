@@ -1,28 +1,41 @@
-class PizzaShop < Sinatra::Base
-	require 'json'
-		#index
-		get "/pizzas" do
-			pizzas = Pizza.all.to_json
-		end
-		#show
-		post "/pizzas" do
-		new_pizza = JSON.parse request.body.read
-		pizza.create
-		end
-		#create
-		get "/pizzas/:id" do
-			pizzas = Pizza.find(params[:id]).to_json
-		end
-		#update
-		put "/pizzas/:id" do
-			attributes_to_update = JSON.parse(request.body.read)
-			pizza = Pizza.find(params[:id])
-			pizza.update_attributes(attributes_to_update)
-		end
-		#delete
-		delete "/pizzas/:id" do
-			pizza = Pizza.find(params[:id])
-			pizza.destroy
-		end
+require 'json'
+require "./models/pizza.rb"
 
+class PizzaShop < Sinatra::Base
+	# General route actions
+	# Get Route
+	get '/pizzas' do
+		@all_pizzas = Pizza.all
+		@all_pizzas.to_json
+	end
+
+	# Get Route
+	get '/pizzas/:id' do
+		@found_pizza = Pizza.find(params[:id])
+		@found_pizza.to_json
+	end
+
+	# Create Route
+	post '/pizzas' do
+		request.body.rewind
+        new_pizza = request.body.read
+        parsed_pizza = JSON.parse(new_pizza)
+		Pizza.create(parsed_pizza)
+	end
+
+	# Update Route
+	put '/pizzas/:id' do
+		new_pizza = request.body.read
+		parsed_new_pizza = JSON.parse(new_pizza)
+		@updating_pizza = Pizza.find(params[:id])
+		@updating_pizza.update_attributes(parsed_new_pizza)
+		redirect('/pizzas')
+	end
+
+	# Delete Route
+	delete '/pizzas/:id' do
+		@deleted_pizza = Pizza.find(params[:id])
+		@deleted_pizza.destroy
+		redirect('/pizzas')
+	end
 end
